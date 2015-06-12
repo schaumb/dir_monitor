@@ -24,6 +24,10 @@
 #include <sys/inotify.h>
 #include <errno.h>
 
+#ifndef DIR_MONITOR_INOTIFY_MODIFICATION_MASK
+#	define DIR_MONITOR_INOTIFY_MODIFICATION_MASK IN_CLOSE_WRITE
+#endif
+
 namespace boost {
 namespace asio {
 
@@ -41,7 +45,7 @@ public:
 
     void add_directory(const std::string &dirname)
     {
-        int wd = inotify_add_watch(fd_, dirname.c_str(), IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO);
+        int wd =  inotify_add_watch(fd_, dirname.c_str(), IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | DIR_MONITOR_INOTIFY_MODIFICATION_MASK);
         if (wd == -1)
         {
             boost::system::system_error e(boost::system::error_code(errno, boost::system::get_system_category()), "boost::asio::dir_monitor_impl::add_directory: inotify_add_watch failed");
@@ -159,9 +163,10 @@ private:
                 {
                 case IN_CREATE: type = dir_monitor_event::added; break;
                 case IN_DELETE: type = dir_monitor_event::removed; break;
-                case IN_MODIFY: type = dir_monitor_event::modified; break;
                 case IN_MOVED_FROM: type = dir_monitor_event::renamed_old_name; break;
                 case IN_MOVED_TO: type = dir_monitor_event::renamed_new_name; break;
+                case IN_MODIFY:
+                case IN_CLOSE_WRITE: type = dir_monitor_event::modified; break;
                 case IN_CREATE | IN_ISDIR:
                     {
                         type = dir_monitor_event::added;
