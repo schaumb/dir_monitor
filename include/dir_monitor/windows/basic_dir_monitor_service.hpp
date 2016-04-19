@@ -117,7 +117,7 @@ public:
             "boost::asio::basic_dir_monitor_service::add_directory: CreateIoCompletionPort failed");
 
         DWORD bytes_transferred; // ignored
-        helper::throw_system_error_if(FALSE == ReadDirectoryChangesW(ck_holder->handle, ck_holder->buffer, sizeof(ck_holder->buffer), FALSE, 0x1FF, &bytes_transferred, &ck_holder->overlapped, NULL),
+        helper::throw_system_error_if(FALSE == ReadDirectoryChangesW(ck_holder->handle, ck_holder->buffer, sizeof(ck_holder->buffer), TRUE, 0x1FF, &bytes_transferred, &ck_holder->overlapped, NULL),
             "boost::asio::basic_dir_monitor_service::add_directory: ReadDirectoryChangesW failed");
 
         impl->add_directory(dirname, ck_holder->handle);
@@ -290,7 +290,7 @@ private:
             } while (fni->NextEntryOffset);
 
             ZeroMemory(&ck_holder->overlapped, sizeof(ck_holder->overlapped));
-            helper::throw_system_error_if(!ReadDirectoryChangesW(ck_holder->handle,ck_holder->buffer, sizeof(ck_holder->buffer), FALSE, 0x1FF, &bytes_transferred, &ck_holder->overlapped, NULL),
+            helper::throw_system_error_if(!ReadDirectoryChangesW(ck_holder->handle,ck_holder->buffer, sizeof(ck_holder->buffer), TRUE, 0x1FF, &bytes_transferred, &ck_holder->overlapped, NULL),
                 "boost::asio::basic_dir_monitor_service::work_thread: ReadDirectoryChangesW failed");
         }
     
