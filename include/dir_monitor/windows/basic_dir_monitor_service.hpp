@@ -28,7 +28,7 @@ namespace helper {
             if (condition)
             {
                 DWORD last_error = GetLastError();
-                boost::system::system_error e(boost::system::error_code(last_error, boost::system::get_system_category()), msg);
+                boost::system::system_error e(boost::system::error_code(last_error, boost::system::system_category()), msg);
                 boost::throw_exception(e);
             }
         }
@@ -194,7 +194,9 @@ public:
     template <typename Handler>
     void async_monitor(implementation_type &impl, Handler handler)
     {
-        this->async_monitor_io_service_.post(monitor_operation<Handler>(impl, this->get_io_service(), handler));
+        this->async_monitor_io_service_.get_executor().post(monitor_operation<Handler>(impl, this->get_io_service(), handler), std::allocator());
+//        boost::asio::post(this->get_io_service(), monitor_operation<Handler>(impl, this->get_io_service(), handler));
+//        this->async_monitor_io_service_.post(monitor_operation<Handler>(impl, this->get_io_service(), handler));
     }
 
 private:
